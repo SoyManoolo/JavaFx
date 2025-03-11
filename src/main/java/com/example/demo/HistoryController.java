@@ -12,8 +12,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
+import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class HistoryController {
 
@@ -38,35 +39,38 @@ public class HistoryController {
         historyData.add(0, formattedEntry);
     }
 
-    // Método para contar palabras
+    // Método optimizado para contar palabras usando streams
     private static int getWordCount(String text) {
-        return text.trim().isEmpty() ? 0 : text.split("\\s+").length;
+        return (int) Arrays.stream(text.trim().split("\\s+"))
+                .filter(word -> !word.isEmpty())
+                .count();
     }
 
-    // Método para contar caracteres (sin espacios)
+    // Método optimizado para contar caracteres sin espacios usando streams
     private static int getCharCount(String text) {
-        return (int) text.chars().filter(c -> !Character.isWhitespace(c)).count();
+        return (int) text.codePoints().filter(c -> !Character.isWhitespace(c)).count();
     }
 
-    // Método para extraer correos electrónicos
+    // Método optimizado para extraer correos electrónicos con streams
     private static String getEmails(String text) {
         Pattern emailPattern = Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
-        Matcher matcher = emailPattern.matcher(text);
-        List<String> emails = new ArrayList<>();
-        while (matcher.find()) {
-            emails.add(matcher.group());
-        }
+
+        List<String> emails = emailPattern.matcher(text)
+                .results()
+                .map(MatchResult::group)
+                .collect(Collectors.toList());
+
         return emails.isEmpty() ? "-" : String.join(", ", emails);
     }
 
-    // Método para extraer URLs
+    // Método optimizado para extraer URLs con streams
     private static String getURLs(String text) {
-        Pattern urlPattern = Pattern.compile("(https?://\\S+|www\\.[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}|[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})");
-        Matcher matcher = urlPattern.matcher(text);
-        List<String> urls = new ArrayList<>();
-        while (matcher.find()) {
-            urls.add(matcher.group());
-        }
+        Pattern urlPattern = Pattern.compile("(?:(?:https?|ftp)://|www\\.)\\S+\\.[a-zA-Z]{2,}(?:/\\S*)?");
+        List<String> urls = urlPattern.matcher(text)
+                .results()
+                .map(MatchResult::group)
+                .collect(Collectors.toList());
+
         return urls.isEmpty() ? "-" : String.join(", ", urls);
     }
 
