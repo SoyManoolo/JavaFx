@@ -12,9 +12,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class TextAnalyzerController {
 
@@ -37,44 +34,23 @@ public class TextAnalyzerController {
                 return;
             }
 
-            // Contar palabras y caracteres
-            List<String> words = Arrays.stream(text.split("[^\\p{L}\\d]+"))
-                    .filter(word -> !word.isEmpty())
-                    .collect(Collectors.toList());
+            // Usar métodos de la clase TextAnalyzerUtils
+            int wordCount = TextAnalyzerUtils.getWordCount(text);
+            int charCount = TextAnalyzerUtils.getCharCount(text);
+            String emails = TextAnalyzerUtils.getEmails(text);
+            String urls = TextAnalyzerUtils.getURLs(text);
 
-            long charCount = text.chars()
-                    .filter(c -> !Character.isWhitespace(c))
-                    .count();
-
-            // Expresión regular para correos electrónicos
-            Pattern emailPattern = Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
-            Matcher emailMatcher = emailPattern.matcher(text);
-            List<String> emails = new ArrayList<>();
-            while (emailMatcher.find()) {
-                emails.add(emailMatcher.group());
-            }
-
-            // Expresión regular para URLs
-            Pattern urlPattern = Pattern.compile(
-                    "(?:(?:https?|ftp)://|www\\.)\\S+\\.[a-zA-Z]{2,}(?:/\\S*)?"
-            );
-            Matcher urlMatcher = urlPattern.matcher(text);
-            List<String> urls = new ArrayList<>();
-            while (urlMatcher.find()) {
-                urls.add(urlMatcher.group());
-            }
-
-            // Actualizar etiquetas sin modificar la parte en negrita
-            updateTextFlow(wordCountFlow, String.valueOf(words.size()));
+            // Actualizar UI
+            updateTextFlow(wordCountFlow, String.valueOf(wordCount));
             updateTextFlow(charCountFlow, String.valueOf(charCount));
-            updateTextFlow(emailFlow, emails.isEmpty() ? "-" : String.join(", ", emails));
-            updateTextFlow(urlFlow, urls.isEmpty() ? "-" : String.join(", ", urls));
+            updateTextFlow(emailFlow, emails);
+            updateTextFlow(urlFlow, urls);
 
             // Guardar en historial
             String historyEntry = "Texto: " + text + "\n" +
-                    "Palabras: " + words.size() + " | Caracteres: " + charCount + "\n" +
-                    "Correos: " + (emails.isEmpty() ? "-" : String.join(", ", emails)) + "\n" +
-                    "URLs: " + (urls.isEmpty() ? "-" : String.join(", ", urls)) + "\n";
+                    "Palabras: " + wordCount + " | Caracteres: " + charCount + "\n" +
+                    "Correos: " + emails + "\n" +
+                    "URLs: " + urls + "\n";
 
             HistoryController.addHistoryEntry(historyEntry);
 
@@ -88,13 +64,27 @@ public class TextAnalyzerController {
     }
 
     @FXML
-    public void openHistory() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/demo/history-view.fxml"));
-        Stage historyStage = new Stage();
-        historyStage.setTitle("Historial de Análisis");
-        historyStage.setScene(new Scene(fxmlLoader.load(), 800, 600));
-        historyStage.show();
+    public void openHistory() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/demo/history-view.fxml"));
+
+            if (fxmlLoader.getLocation() == null) {
+                System.err.println("Error: No se encontró el archivo history-view.fxml");
+                return;
+            }
+
+            System.out.println("Cargando ventana de historial...");
+            Stage historyStage = new Stage();
+            historyStage.setTitle("Historial de Análisis");
+            historyStage.setScene(new Scene(fxmlLoader.load(), 800, 600));
+            historyStage.show();
+            System.out.println("Ventana de historial abierta correctamente.");
+        } catch (IOException e) {
+            System.err.println("Error al abrir la ventana de historial: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
 
     private void updateTextFlow(TextFlow textFlow, String normalText) {
         if (textFlow.getChildren().size() > 1) {

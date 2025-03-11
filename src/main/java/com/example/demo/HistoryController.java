@@ -11,10 +11,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
-import java.util.regex.MatchResult;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class HistoryController {
 
@@ -25,53 +21,6 @@ public class HistoryController {
     @FXML
     public void initialize() {
         historyList.setItems(historyData);
-    }
-
-    public static void addHistoryEntry(String entry) {
-        String formattedEntry =
-                "🔹 - Texto: " + entry + "\n" +
-                        "🔹 - Palabras: " + getWordCount(entry) + "\n" +
-                        "🔹 - Caracteres: " + getCharCount(entry) + "\n" +
-                        "🔹 - Correos: " + getEmails(entry) + "\n" +
-                        "🔹 - URLs: " + getURLs(entry) + "\n" +
-                        "----------------------------------------------------------";
-
-        historyData.add(0, formattedEntry);
-    }
-
-    // Método optimizado para contar palabras usando streams
-    private static int getWordCount(String text) {
-        return (int) Arrays.stream(text.trim().split("\\s+"))
-                .filter(word -> !word.isEmpty())
-                .count();
-    }
-
-    // Método optimizado para contar caracteres sin espacios usando streams
-    private static int getCharCount(String text) {
-        return (int) text.codePoints().filter(c -> !Character.isWhitespace(c)).count();
-    }
-
-    // Método optimizado para extraer correos electrónicos con streams
-    private static String getEmails(String text) {
-        Pattern emailPattern = Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
-
-        List<String> emails = emailPattern.matcher(text)
-                .results()
-                .map(MatchResult::group)
-                .collect(Collectors.toList());
-
-        return emails.isEmpty() ? "-" : String.join(", ", emails);
-    }
-
-    // Método optimizado para extraer URLs con streams
-    private static String getURLs(String text) {
-        Pattern urlPattern = Pattern.compile("(?:(?:https?|ftp)://|www\\.)\\S+\\.[a-zA-Z]{2,}(?:/\\S*)?");
-        List<String> urls = urlPattern.matcher(text)
-                .results()
-                .map(MatchResult::group)
-                .collect(Collectors.toList());
-
-        return urls.isEmpty() ? "-" : String.join(", ", urls);
     }
 
     @FXML
@@ -109,6 +58,10 @@ public class HistoryController {
                 System.err.println("Error al guardar el historial: " + e.getMessage());
             }
         }
+    }
+
+    public static void addHistoryEntry(String entry) {
+        historyData.add(0, entry); // Agrega solo el texto ya formateado sin recalcularlo
     }
 
 }

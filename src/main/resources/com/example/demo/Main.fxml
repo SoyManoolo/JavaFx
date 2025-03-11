@@ -29,8 +29,6 @@
         </HBox>
     </StackPane>
 
-
-
     <TextArea fx:id="inputText" promptText="Escribe o pega el texto aquí..." prefHeight="250.0" wrapText="true"/>
 
     <Button text="Analizar" onAction="#analyzeText"/>
