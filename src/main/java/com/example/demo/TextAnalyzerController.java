@@ -56,7 +56,7 @@ public class TextAnalyzerController {
 
             // Expresión regular para URLs
             Pattern urlPattern = Pattern.compile(
-                    "(https?://\\S+|www\\.[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}|[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})"
+                    "(https?://\\S+|www\\.[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(?!\\S*@)|[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(?=/|\\b)(?!\\S*@))"
             );
             Matcher urlMatcher = urlPattern.matcher(text);
             List<String> urls = new ArrayList<>();
